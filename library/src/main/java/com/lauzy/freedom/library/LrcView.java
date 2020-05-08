@@ -12,6 +12,7 @@ import android.os.Looper;
 import android.support.annotation.ColorInt;
 import android.support.annotation.Nullable;
 import android.support.v4.content.ContextCompat;
+import android.support.v4.text.BidiFormatter;
 import android.support.v4.view.ViewCompat;
 import android.text.Layout;
 import android.text.StaticLayout;
@@ -218,12 +219,17 @@ public class LrcView extends View {
 
     private void drawLrc(Canvas canvas, float x, float y, int i) {
         String text = mLrcData.get(i).getText();
-        StaticLayout staticLayout = mLrcMap.get(text);
+        BidiFormatter.Builder builder = new BidiFormatter.Builder();
+        builder.stereoReset(true);
+        BidiFormatter formatter = builder.build();
+        String formattedText = formatter.unicodeWrap(text);
+
+        StaticLayout staticLayout = mLrcMap.get(formattedText);
         if (staticLayout == null) {
             mTextPaint.setTextSize(mLrcTextSize);
-            staticLayout = new StaticLayout(text, mTextPaint, getLrcWidth(),
+            staticLayout = new StaticLayout(formattedText, mTextPaint, getLrcWidth(),
                     Layout.Alignment.ALIGN_NORMAL, 1f, 0f, false);
-            mLrcMap.put(text, staticLayout);
+            mLrcMap.put(formattedText, staticLayout);
         }
         canvas.save();
         canvas.translate(x, y - staticLayout.getHeight() / 2 - mOffset);
